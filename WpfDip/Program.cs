@@ -5,7 +5,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.IO;
 using Newtonsoft.Json;
-
+using System.Net.NetworkInformation;
+using Atlassian.Jira;
 
 namespace WpfDip
 {
@@ -33,200 +34,282 @@ namespace WpfDip
         /// 
         /// Метод для формирования списка задач на экспорт
         /// </summary>
-        public List<IssueWork> CreateIssuesList(Dictionary<string, List<string>> filt)
+        public List<string> CreateIssuesList(Dictionary<string, List<string>> filt)//удалить
         {
-            var issues = IssuesFilter(filt);//вызов метода фильрации
-            string[] parMas;//объявление массива, куда будут записываться значения из Jira
-            List<IssueWork> issueList = new List<IssueWork>();//Создания списка, в который будут записываться объекты класса
-            IssueWork IssWork;
-            foreach (var c in issues)
-            {
-                parMas = FillingOutputArray(c, filt);//Вызов метода проверки на null
-                if (filt.ContainsKey("paramchangefilter"))
-                {
-                    if( Convert.ToInt32(parMas[11]) >= MainWindow.countLimit)//Тест отбора по количеству переходов на этапе вывода
-                    {
-                        IssWork = new IssueWork(parMas[0], parMas[1], parMas[2], parMas[3], parMas[4], parMas[5], parMas[6], parMas[7], parMas[8], parMas[9], parMas[10], parMas[11]);
-                        issueList.Add(IssWork);
-                    }
-                }
-                else
-                {
-                    //if (parMas[11] == "0")
-                    //    parMas[11] = "Пользователь не задал параметр";
-                   IssWork = new IssueWork(parMas[0], parMas[1], parMas[2], parMas[3], parMas[4], parMas[5], parMas[6], parMas[7], parMas[8], parMas[9], parMas[10], parMas[11]);
-                   issueList.Add(IssWork);//Добавление объекта в список
-                }
-            }
-            return issueList;
+            var issuesFileList = IssuesFilter(filt);//вызов метода фильрации
+            //string[] parMas;//объявление массива, куда будут записываться значения из Jira
+            //List<IssueWork> issueList = new List<IssueWork>();//Создания списка, в который будут записываться объекты класса
+            //IssueWork IssWork;
+            //List<string> issuesFileOutputList = new List<string>();
+            //foreach (var pathFile in issuesFileList)
+            //{
+            //    List<Atlassian.Jira.Issue> issues;
+            //    using (TextReader fs = File.OpenText(pathFile))
+            //    {
+            //        issues = JsonConvert.DeserializeObject<List<Issue>>(fs.ReadToEnd());
+            //    }
+
+            //    foreach (var c in issues)
+            //    {
+            //        parMas = FillingOutputArray(c, filt);//Вызов метода проверки на null
+            //        if (filt.ContainsKey("paramchangefilter"))
+            //        {
+            //            if (Convert.ToInt32(parMas[11]) >= MainWindow.countLimit)//Тест отбора по количеству переходов на этапе вывода
+            //            {
+            //                IssWork = new IssueWork(parMas[0], parMas[1], parMas[2], parMas[3], parMas[4], parMas[5], parMas[6], parMas[7], parMas[8], parMas[9], parMas[10], parMas[11]);
+            //                issueList.Add(IssWork);
+            //            }
+
+            //        }
+            //        else
+            //        {
+            //            IssWork = new IssueWork(parMas[0], parMas[1], parMas[2], parMas[3], parMas[4], parMas[5], parMas[6], parMas[7], parMas[8], parMas[9], parMas[10], parMas[11]);
+            //            issueList.Add(IssWork);//Добавление объекта в список
+            //        }
+            //    }
+
+            //    var pathFileFilter = Path.GetTempFileName();
+            //    File.AppendAllText(pathFileFilter, JsonConvert.SerializeObject(issueList));//временный json 
+            //    issuesFileOutputList.Add(pathFileFilter);//добавление в список
+            //}
+            return issuesFileList;
         }
+
+
         /// <summary>
         /// Метод для фильтрации задач
         /// </summary>
-        static List<Atlassian.Jira.Issue> IssuesFilter(Dictionary<string, List<string>> filt)
+        static List<string> IssuesFilter(Dictionary<string, List<string>> filt)
         {
 
+            var pathTempFile = Path.GetTempFileName();//создается временный файл, переменная хранит путь
+
+
+
+            jiraLog.Issues.MaxIssuesPerRequest = int.MaxValue;
+            //jiraLog.Issues.ValidateQuery = false;
+
+            List<IssueWork> issuesList = new List<IssueWork>();
+
+            List<string> issuesFileList = new List<string>();//список путей к файлам, хранящим данные
+            List<string> issuesFileFilterList = new List<string>();
+            List<Issue> issuesBegin = new List<Issue>();
+            List<IssueWork> IssWork = new List<IssueWork>();
+            issuesBegin.AddRange( jiraLog.Issues.GetIssuesFromJqlAsync("").Result.ToList()); ;//пишем первые 100 задач
+            int count = 0;
+            do {            //выгрузка всех задач в список
+                var pathFile = Path.GetTempFileName();
+                foreach (var c in issuesBegin)
+                {
+                    var parMas = FillingOutputArray(c, filt);//Вызов метода проверки на null
+                    if (filt.ContainsKey("paramchangefilter"))
+                    {
+                        if (Convert.ToInt32(parMas[11]) >= MainWindow.countLimit)//Тест отбора по количеству переходов на этапе вывода
+                            IssWork.Add(new IssueWork(parMas[0], parMas[1], parMas[2], parMas[3], parMas[4], parMas[5], parMas[6], parMas[7], parMas[8], parMas[9], parMas[10], parMas[11]));
+                    }
+                    else
+                        IssWork.Add(new IssueWork(parMas[0], parMas[1], parMas[2], parMas[3], parMas[4], parMas[5], parMas[6], parMas[7], parMas[8], parMas[9], parMas[10], parMas[11]));
+                }
+
+                File.AppendAllText(pathFile, JsonConvert.SerializeObject(IssWork));//временный json 
+                IssWork.Clear();
+                issuesFileList.Add(pathFile);//добавление в список
+
+                //issuesList.AddRange(issues);
+
+                issuesBegin.Clear();
+                count += 100;
+                issuesBegin.AddRange(jiraLog.Issues.GetIssuesFromJqlAsync("", startAt: count).Result.ToList());
+                string t = "";
+            } while (issuesBegin.Count != 0);
             
-            var issues = jiraLog.Issues.Queryable.ToList();
-            List<Atlassian.Jira.Issue> issuesList = new List<Atlassian.Jira.Issue>();
-            if (filt.ContainsKey("summary"))
-            {
-                issuesList.AddRange(
-                    issues.Where(c =>//если условие выполняется - нужная задача записывается список
-                    {
-                        if (filt["summary"].Where(t => t == c.Summary.ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))//Возвращает все задачи, где проект в Jira равен пользовательскому и задача не записана в список
-                            return true;
-                        else return false;
-                    }).ToList());
-                issues.Clear();
-                issues.AddRange(issuesList);
-                issuesList.Clear();
-            }
-
-            if (filt.ContainsKey("key"))
-            {
-                issuesList.AddRange(
-                    issues.Where(c =>
-                    {
-                        if (filt["key"].Where(t => t == c.Key.ToString().ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
-                            return true;
-                        else return false;
-                    }).ToList());
-                issues.Clear();
-                issues.AddRange(issuesList);
-                issuesList.Clear();
-            }
-
-            if (filt.ContainsKey("priority"))
-            {
-                issuesList.AddRange(
-                    issues.Where(c =>
-                    {
-                        if (filt["priority"].Where(t => t == c.Priority.ToString().ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
-                            return true;
-                        else return false;
-                    }).ToList());
-                issues.Clear();
-                issues.AddRange(issuesList);
-                issuesList.Clear();
-
-            }
-
-            if (filt.ContainsKey("status"))
-            {
-                issuesList.AddRange(
-                    issues.Where(c =>
-                    {
-                        if (filt["status"].Where(t => t == c.Status.ToString().ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
-                            return true;
-                        else return false;
-                    }).ToList());
-                issues.Clear();
-                issues.AddRange(issuesList);
-                issuesList.Clear();
-            }
-
-            if (filt.ContainsKey("type"))
-            {
-                issuesList.AddRange(
-                    issues.Where(c =>
-                    {
-                        if (filt["type"].Where(t => t == c.Type.ToString().ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
-                            return true;
-                        else return false;
-                    }).ToList());
-                issues.Clear();
-                issues.AddRange(issuesList);
-                issuesList.Clear();
-            }
-
-            if (filt.ContainsKey("created"))
-            {
-                issuesList.AddRange(
-                    issues.Where(c =>
-                    {
-                        if (filt["created"].Where(t => t == c.Created.ToString().ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
-                            return true;
-                        else return false;
-                    }).ToList());
-                issues.Clear();
-                issues.AddRange(issuesList);
-                issuesList.Clear();
-            }
-
-            if (filt.ContainsKey("environment"))
-            {
-                issuesList.AddRange(
-                    issues.Where(c =>
-                    {
-                        if (filt["environment"].Where(t => t == c.Environment.ToString().ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
-                            return true;
-                        else return false;
-                    }).ToList());
-                issues.Clear();
-                issues.AddRange(issuesList);
-                issuesList.Clear();
-            }
-
-            if (filt.ContainsKey("project"))
-            {
-                issuesList.AddRange(
-                    issues.Where(c =>
-                    {
-                        if (filt["project"].Where(t => t == c.Project.ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
-                            return true;
-                        else return false;
-                    }).ToList());
-                issues.Clear();
-                issues.AddRange(issuesList);
-                issuesList.Clear();
-            }
-
-            if (filt.ContainsKey("assigneeuser"))
-            {
-                issuesList.AddRange(
-                    issues.Where(c =>
-                    {
-                        if (filt["assigneeuser"].Where(t => t == c.AssigneeUser.DisplayName.ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
-                            return true;
-                        else return false;
-                    }).ToList());
-                issues.Clear();
-                issues.AddRange(issuesList);
-                issuesList.Clear();
-            }
-
-            if (filt.ContainsKey("reporteruser"))
-            {
-                issuesList.AddRange(
-                    issues.Where(c =>
-                    {
-                        if (filt["reporteruser"].Where(t => t == c.ReporterUser.DisplayName.ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
-                            return true;
-                        else return false;
-                    }).ToList());
-                issues.Clear();
-                issues.AddRange(issuesList);
-                issuesList.Clear();
-            }
-
-            //if (filt.ContainsKey("paramchangefilter"))//для подсчёта удалить
+            //
+            //var issues = jiraLog.Issues.Queryable.Where(c =>
             //{
-            //    issuesList.AddRange(
-            //        issues.Where(c =>
-            //        {
-            //            if (Convert.ToInt32(paramChangeCountWork(c, filt)) >= MainWindow.countLimit)
-            //                return true;
-            //            else return false;
-            //        }).ToList());
-            //    issues.Clear();
-            //    issues.AddRange(issuesList);
-            //    issuesList.Clear();
-
+            //if (filt["summary"].Where(t => t == c.Summary.ToLower().Replace(" ", "")).Count() > 0)
+            //{
+            //    if (filt["key"].Where(t => t == c.Key.ToString().ToLower().Replace(" ", "")).Count() > 0)
+            //        if (filt["priority"].Where(t => t == c.Priority.ToString().ToLower().Replace(" ", "")).Count() > 0)
+            //            if (filt["status"].Where(t => t == c.Status.ToString().ToLower().Replace(" ", "")).Count() > 0)
+            //                if (filt["type"].Where(t => t == c.Type.ToString().ToLower().Replace(" ", "")).Count() > 0)
+            //                    if (filt["created"].Where(t => t == c.Created.ToString().ToLower().Replace(" ", "")).Count() > 0)
+            //                        if (filt["environment"].Where(t => t == c.Environment.ToString().ToLower().Replace(" ", "")).Count() > 0)
+            //                            if (filt["project"].Where(t => t == c.Project.ToLower().Replace(" ", "")).Count() > 0)
+            //                                if (filt["assigneeuser"].Where(t => t == c.AssigneeUser.DisplayName.ToLower().Replace(" ", "")).Count() > 0)
+            //                                    if (filt["reporteruser"].Where(t => t == c.ReporterUser.DisplayName.ToLower().Replace(" ", "")).Count() > 0)
+            //                                        return true;
             //}
+            //else return false;
 
-            issuesList.AddRange(issues);
-            return issuesList;
+
+            foreach (var pathFile in issuesFileList)
+            {
+                List<IssueWork> issues;
+                using (TextReader fs = File.OpenText(pathFile))
+                {
+                    issues = JsonConvert.DeserializeObject<List<IssueWork>>(fs.ReadToEnd());
+                }
+
+                if (filt.ContainsKey("summary"))
+                {
+                    issuesList.AddRange(
+                        issues.Where(c =>//если условие выполняется - нужная задача записывается список
+                        {
+                            if (filt["summary"].Where(t => t == c.Summary.ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))//Возвращает все задачи, где проект в Jira равен пользовательскому и задача не записана в список
+                            return true;
+                            else return false;
+                        }).ToList());
+                    issues.Clear();
+                    issues.AddRange(issuesList);
+                    issuesList.Clear();
+                }
+
+                if (filt.ContainsKey("key"))
+                {
+                    issuesList.AddRange(
+                        issues.Where(c =>
+                        {
+                            if (filt["key"].Where(t => t == c.Key.ToString().ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
+                                return true;
+                            else return false;
+                        }).ToList());
+                    issues.Clear();
+                    issues.AddRange(issuesList);
+                    issuesList.Clear();
+                }
+
+                if (filt.ContainsKey("priority"))
+                {
+                    issuesList.AddRange(
+                        issues.Where(c =>
+                        {
+                            if (filt["priority"].Where(t => t == c.Priority.ToString().ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
+                                return true;
+                            else return false;
+                        }).ToList());
+                    issues.Clear();
+                    issues.AddRange(issuesList);
+                    issuesList.Clear();
+
+                }
+
+                if (filt.ContainsKey("status"))
+                {
+                    issuesList.AddRange(
+                        issues.Where(c =>
+                        {
+                            if (filt["status"].Where(t => t == c.Status.ToString().ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
+                                return true;
+                            else return false;
+                        }).ToList());
+                    issues.Clear();
+                    issues.AddRange(issuesList);
+                    issuesList.Clear();
+                }
+
+                if (filt.ContainsKey("type"))
+                {
+                    issuesList.AddRange(
+                        issues.Where(c =>
+                        {
+                            if (filt["type"].Where(t => t == c.Type.ToString().ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
+                                return true;
+                            else return false;
+                        }).ToList());
+                    issues.Clear();
+                    issues.AddRange(issuesList);
+                    issuesList.Clear();
+                }
+
+                if (filt.ContainsKey("created"))
+                {
+                    issuesList.AddRange(
+                        issues.Where(c =>
+                        {
+                            if (filt["created"].Where(t => t == c.Created.ToString().ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
+                                return true;
+                            else return false;
+                        }).ToList());
+                    issues.Clear();
+                    issues.AddRange(issuesList);
+                    issuesList.Clear();
+                }
+
+                if (filt.ContainsKey("environment"))
+                {
+                    issuesList.AddRange(
+                        issues.Where(c =>
+                        {
+                            if (filt["environment"].Where(t => t == c.Environment.ToString().ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
+                                return true;
+                            else return false;
+                        }).ToList());
+                    issues.Clear();
+                    issues.AddRange(issuesList);
+                    issuesList.Clear();
+                }
+
+                if (filt.ContainsKey("project"))
+                {
+                    issuesList.AddRange(
+                        issues.Where(c =>
+                        {
+                            if (filt["project"].Where(t => t == c.Project.ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
+                                return true;
+                            else return false;
+                        }).ToList());
+                    issues.Clear();
+                    issues.AddRange(issuesList);
+                    issuesList.Clear();
+                }
+
+                if (filt.ContainsKey("assigneeuser"))
+                {
+                    issuesList.AddRange(
+                        issues.Where(c =>
+                        {
+                            if (filt["assigneeuser"].Where(t => t == c.AssigneeUser.ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
+                                return true;
+                            else return false;
+                        }).ToList());
+                    issues.Clear();
+                    issues.AddRange(issuesList);
+                    issuesList.Clear();
+                }
+
+                if (filt.ContainsKey("reporteruser"))
+                {
+                    issuesList.AddRange(
+                        issues.Where(c =>
+                        {
+                            if (filt["reporteruser"].Where(t => t == c.ReporterUser.ToLower().Replace(" ", "")).Count() > 0 && !issuesList.Contains(c))
+                                return true;
+                            else return false;
+                        }).ToList());
+                    issues.Clear();
+                    issues.AddRange(issuesList);
+                    issuesList.Clear();
+                }
+                var pathFileFilter = Path.GetTempFileName();
+                File.AppendAllText(pathFileFilter, JsonConvert.SerializeObject(issues));//временный json 
+                issuesFileFilterList.Add(pathFileFilter);//добавление в список
+            }
+            ////if (filt.ContainsKey("paramchangefilter"))//для подсчёта удалить
+            ////{
+            ////    issuesList.AddRange(
+            ////        issues.Where(c =>
+            ////        {
+            ////            if (Convert.ToInt32(paramChangeCountWork(c, filt)) >= MainWindow.countLimit)
+            ////                return true;
+            ////            else return false;
+            ////        }).ToList());
+            ////    issues.Clear();
+            ////    issues.AddRange(issuesList);
+            ////    issuesList.Clear();
+
+            ////}
+
+            return issuesFileFilterList;
         }
         /// <summary>
         /// Метод для проверки на Null значений из Jira
@@ -373,11 +456,18 @@ namespace WpfDip
         /// <summary>
         /// Метод для экспорта CSV
         /// </summary>
-        public void CSVWork(List<IssueWork> issueList, string path)
+        public void CSVWork(List<string> issueFileList, string path)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);//прописать в инструментарий
-            
-            StringBuilder csv = new StringBuilder();
+            var issueList = new List<IssueWork>();
+            foreach (var pathFile in issueFileList)
+            {
+                using (TextReader fs = File.OpenText(pathFile))
+                {
+                    issueList.AddRange(JsonConvert.DeserializeObject<List<IssueWork>>(fs.ReadToEnd()));
+                }
+            }
+                StringBuilder csv = new StringBuilder();
             csv.AppendLine("Summary" + ";" +
                     "Key" + ";" +
                     "Priority" + ";" +
@@ -413,8 +503,16 @@ namespace WpfDip
         /// 
         /// Метод для экспорта в JSON
         /// </summary>
-        public void JsonWork(List<IssueWork> issueList, string path)
+        public void JsonWork(List<string> issueFileList, string path)
         {
+            var issueList = new List<IssueWork>();
+            foreach (var pathFile in issueFileList)
+            {
+                using (TextReader fs = File.OpenText(pathFile))
+                {
+                    issueList.AddRange(JsonConvert.DeserializeObject<List<IssueWork>>(fs.ReadToEnd()));
+                }
+            }
             File.WriteAllText(path, JsonConvert.SerializeObject(issueList));
         }
     }

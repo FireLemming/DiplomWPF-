@@ -14,7 +14,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
+using System.IO;
+using Newtonsoft.Json;
 
 namespace WpfDip
 {
@@ -26,6 +27,7 @@ namespace WpfDip
         public static Dictionary<string, List<string>> filt = new Dictionary<string, List<string>>();
         public static Dictionary<string, List<string>> filtBack = new Dictionary<string, List<string>>();
         Program prog = new Program();
+        List<string> issuesFileOutputList = new List<string>();
         List<IssueWork> issueList = new List<IssueWork>();
         public static int countLimit;
         public MainWindow()
@@ -69,7 +71,14 @@ namespace WpfDip
             dgAll.ItemsSource = null;
             dgAll.Items.Refresh();
 
-            issueList.AddRange(prog.CreateIssuesList(filt));            
+            issuesFileOutputList.AddRange(prog.CreateIssuesList(filt));
+            foreach (var pathFile in issuesFileOutputList)
+            {
+                using (TextReader fs = File.OpenText(pathFile))
+                {
+                    issueList.AddRange(JsonConvert.DeserializeObject<List<IssueWork>>(fs.ReadToEnd()));
+                }
+            }
             dgAll.ItemsSource = issueList;
             
 
@@ -78,19 +87,19 @@ namespace WpfDip
 
         private void btExportCSV_Click(object sender, RoutedEventArgs e)
         {
-            if (dgAll.Items.Count > 0)
-            {
-                ExportWindow ew = new ExportWindow(issueList, "csv");
+            //if (dgAll.Items.Count > 0)
+           // {
+                ExportWindow ew = new ExportWindow(issuesFileOutputList, "csv");
                 ew.ShowDialog();
-            }
-            else MessageBox.Show("Сначала выберите задачи", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Error);
+           // }
+            //else MessageBox.Show("Сначала выберите задачи", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         private void btExportJSON_Click(object sender, RoutedEventArgs e)
         {
             if (dgAll.Items.Count > 0)
             {
-                ExportWindow ew = new ExportWindow(issueList, "json");
+                ExportWindow ew = new ExportWindow(issuesFileOutputList, "json");
                 ew.ShowDialog();
             }
             else MessageBox.Show("Сначала выберите задачи", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Error);

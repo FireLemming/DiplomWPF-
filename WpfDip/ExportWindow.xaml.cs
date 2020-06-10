@@ -21,9 +21,9 @@ namespace WpfDip
     public partial class ExportWindow : Window
     {
         string type;
-        List<IssueWork> issueList;
-
-        public ExportWindow(List<IssueWork> IssueList, string Type)
+        List<string> issueList;
+        
+        public ExportWindow(List<string> IssueList, string Type)
         {
             InitializeComponent();
             issueList = IssueList;
