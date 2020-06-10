@@ -34,52 +34,52 @@ namespace WpfDip
         /// 
         /// Метод для формирования списка задач на экспорт
         /// </summary>
-        public List<string> CreateIssuesList(Dictionary<string, List<string>> filt)//удалить
-        {
-            var issuesFileList = IssuesFilter(filt);//вызов метода фильрации
-            //string[] parMas;//объявление массива, куда будут записываться значения из Jira
-            //List<IssueWork> issueList = new List<IssueWork>();//Создания списка, в который будут записываться объекты класса
-            //IssueWork IssWork;
-            //List<string> issuesFileOutputList = new List<string>();
-            //foreach (var pathFile in issuesFileList)
-            //{
-            //    List<Atlassian.Jira.Issue> issues;
-            //    using (TextReader fs = File.OpenText(pathFile))
-            //    {
-            //        issues = JsonConvert.DeserializeObject<List<Issue>>(fs.ReadToEnd());
-            //    }
+        //public List<string> CreateIssuesList(Dictionary<string, List<string>> filt)//удалить
+        //{
+        //    var issuesFileList = IssuesFilter(filt);//вызов метода фильрации
+        //    //string[] parMas;//объявление массива, куда будут записываться значения из Jira
+        //    //List<IssueWork> issueList = new List<IssueWork>();//Создания списка, в который будут записываться объекты класса
+        //    //IssueWork IssWork;
+        //    //List<string> issuesFileOutputList = new List<string>();
+        //    //foreach (var pathFile in issuesFileList)
+        //    //{
+        //    //    List<Atlassian.Jira.Issue> issues;
+        //    //    using (TextReader fs = File.OpenText(pathFile))
+        //    //    {
+        //    //        issues = JsonConvert.DeserializeObject<List<Issue>>(fs.ReadToEnd());
+        //    //    }
 
-            //    foreach (var c in issues)
-            //    {
-            //        parMas = FillingOutputArray(c, filt);//Вызов метода проверки на null
-            //        if (filt.ContainsKey("paramchangefilter"))
-            //        {
-            //            if (Convert.ToInt32(parMas[11]) >= MainWindow.countLimit)//Тест отбора по количеству переходов на этапе вывода
-            //            {
-            //                IssWork = new IssueWork(parMas[0], parMas[1], parMas[2], parMas[3], parMas[4], parMas[5], parMas[6], parMas[7], parMas[8], parMas[9], parMas[10], parMas[11]);
-            //                issueList.Add(IssWork);
-            //            }
+        //    //    foreach (var c in issues)
+        //    //    {
+        //    //        parMas = FillingOutputArray(c, filt);//Вызов метода проверки на null
+        //    //        if (filt.ContainsKey("paramchangefilter"))
+        //    //        {
+        //    //            if (Convert.ToInt32(parMas[11]) >= MainWindow.countLimit)//Тест отбора по количеству переходов на этапе вывода
+        //    //            {
+        //    //                IssWork = new IssueWork(parMas[0], parMas[1], parMas[2], parMas[3], parMas[4], parMas[5], parMas[6], parMas[7], parMas[8], parMas[9], parMas[10], parMas[11]);
+        //    //                issueList.Add(IssWork);
+        //    //            }
 
-            //        }
-            //        else
-            //        {
-            //            IssWork = new IssueWork(parMas[0], parMas[1], parMas[2], parMas[3], parMas[4], parMas[5], parMas[6], parMas[7], parMas[8], parMas[9], parMas[10], parMas[11]);
-            //            issueList.Add(IssWork);//Добавление объекта в список
-            //        }
-            //    }
+        //    //        }
+        //    //        else
+        //    //        {
+        //    //            IssWork = new IssueWork(parMas[0], parMas[1], parMas[2], parMas[3], parMas[4], parMas[5], parMas[6], parMas[7], parMas[8], parMas[9], parMas[10], parMas[11]);
+        //    //            issueList.Add(IssWork);//Добавление объекта в список
+        //    //        }
+        //    //    }
 
-            //    var pathFileFilter = Path.GetTempFileName();
-            //    File.AppendAllText(pathFileFilter, JsonConvert.SerializeObject(issueList));//временный json 
-            //    issuesFileOutputList.Add(pathFileFilter);//добавление в список
-            //}
-            return issuesFileList;
-        }
+        //    //    var pathFileFilter = Path.GetTempFileName();
+        //    //    File.AppendAllText(pathFileFilter, JsonConvert.SerializeObject(issueList));//временный json 
+        //    //    issuesFileOutputList.Add(pathFileFilter);//добавление в список
+        //    //}
+        //    return issuesFileList;
+        //}
 
 
         /// <summary>
         /// Метод для фильтрации задач
         /// </summary>
-        static List<string> IssuesFilter(Dictionary<string, List<string>> filt)
+        public List<string> IssuesFilter(Dictionary<string, List<string>> filt)
         {
 
             var pathTempFile = Path.GetTempFileName();//создается временный файл, переменная хранит путь
@@ -294,21 +294,6 @@ namespace WpfDip
                 File.AppendAllText(pathFileFilter, JsonConvert.SerializeObject(issues));//временный json 
                 issuesFileFilterList.Add(pathFileFilter);//добавление в список
             }
-            ////if (filt.ContainsKey("paramchangefilter"))//для подсчёта удалить
-            ////{
-            ////    issuesList.AddRange(
-            ////        issues.Where(c =>
-            ////        {
-            ////            if (Convert.ToInt32(paramChangeCountWork(c, filt)) >= MainWindow.countLimit)
-            ////                return true;
-            ////            else return false;
-            ////        }).ToList());
-            ////    issues.Clear();
-            ////    issues.AddRange(issuesList);
-            ////    issuesList.Clear();
-
-            ////}
-
             return issuesFileFilterList;
         }
         /// <summary>

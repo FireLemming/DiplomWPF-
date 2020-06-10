@@ -71,7 +71,7 @@ namespace WpfDip
             dgAll.ItemsSource = null;
             dgAll.Items.Refresh();
 
-            issuesFileOutputList.AddRange(prog.CreateIssuesList(filt));
+            issuesFileOutputList.AddRange(prog.IssuesFilter(filt));
             foreach (var pathFile in issuesFileOutputList)
             {
                 using (TextReader fs = File.OpenText(pathFile))
