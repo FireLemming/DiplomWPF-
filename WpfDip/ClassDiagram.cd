@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="WpfDip.Program">
+    <Position X="6.25" Y="0.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AACABCAAAAAQgAAAQAAAAAAEAAAAAAAAAAAAAAACAAA=</HashCode>
+      <FileName>Program.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WpfDip.LoginWindow">
+    <Position X="11.25" Y="3.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAACAAAAoAABAAAAAAABAAAAAAAAAAAAAA=</HashCode>
+      <FileName>LoginWindow.xaml.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="WpfDip.MainWindow">
+    <Position X="8.75" Y="0.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>EAAAACAAEEIQAAAAAABAoJEEGAAAAAgQAAApACAABAA=</HashCode>
+      <FileName>MainWindow.xaml.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="WpfDip.IssueWork">
+    <Position X="6.75" Y="3.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAGAAAgAAQEgAAACAAAAAAAAAQBAQAAAAAAAQA=</HashCode>
+      <FileName>IssueWork.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WpfDip.App">
+    <Position X="11.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>App.xaml.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WpfDip.ExportWindow">
+    <Position X="11.25" Y="0.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAIAgBAAAAAAABAIAAAAA=</HashCode>
+      <FileName>ExportWindow.xaml.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="WpfDip.FilterWindow">
+    <Position X="13.25" Y="0.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AABMAAAAAACAAEAABAEAAAAAAAABAIAAAAAKAACAQAA=</HashCode>
+      <FileName>FilterWindow.xaml.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

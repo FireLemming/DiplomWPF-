@@ -1,0 +1,44 @@
+﻿<Window x:Class="WpfDip.FilterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfDip"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        Title="Создание фильтра" Height="500" Width="800" MinHeight="500" MaxHeight="500" MinWidth="800" MaxWidth="800" Icon="/app-icon-jira.png">
+    <Grid >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="70"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <Border BorderThickness="0" BorderBrush="#19F3C4C4" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Background="#FF0747A6" Margin="0,0,0,0"/>
+        <Border BorderThickness="0" BorderBrush="#FF0747A6" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Grid.RowSpan="2" Background="#19003AFF" Margin="0,0,0,0"/>
+        <Label Name="lbHeader" Content="ТЕСТОВОЕ НАЗВАНИЕ" HorizontalAlignment="Center" Margin="0,12,0,0" VerticalAlignment="Top" FontSize="36" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Grid.Row="0" Foreground="#FFF5F9FF" FontFamily="Adobe Caslon Pro Bold"/>
+        <TextBox x:Name="tbFilter" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,38,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalScrollBarVisibility="Visible" AcceptsReturn="True" VerticalAlignment="Top" Width="708" Height="258" FontSize="20" Visibility="Visible"/>
+        <Button x:Name="btSave" Content="Сохранить" HorizontalAlignment="Left" Width="150" Height="50" Grid.Row="1" VerticalAlignment="Top" VerticalContentAlignment="Center" Background="{StaticResource GrayBlueGradientBrush}" Click="btSave_Click" Margin="516,328,0,0" FontSize="22" ScrollViewer.CanContentScroll="True" BorderThickness="1" BorderBrush="#FFCCD8FF" Foreground="#FFF5F9FF" FontFamily="Adobe Caslon Pro Bold" />
+        <Label x:Name="lbTextFilt" Content="Введите значение фильтра" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="20" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="54,4,0,0" Grid.Row="1" FontFamily="Adobe Caslon Pro Bold" />
+        <Button x:Name="btClear"  HorizontalAlignment="Left"  Width="150" Height="50" Grid.Row="1" VerticalAlignment="Top" VerticalContentAlignment="Bottom"  Background="{StaticResource GrayBlueGradientBrush}" Click="btClear_Click" Margin="116,328,0,0"  FontSize="16" Foreground="#FFF5F9FF" FontFamily="Adobe Caslon Pro Bold">
+            <TextBlock TextAlignment="Center" FontWeight="Normal">Очистка  прошлых <LineBreak/> значений</TextBlock>
+        </Button>
+
+        <TextBox x:Name="tbInitial"  HorizontalAlignment="Left" TextAlignment="Center" Height="258" Margin="40,38,0,0" Grid.Row="1" TextWrapping="Wrap" AcceptsReturn="True" VerticalAlignment="Top" Width="300" Visibility="Collapsed"/>
+        <TextBox x:Name="tbFinal" HorizontalAlignment="Right" TextAlignment="Center" Height="258" Margin="0,38,40,0" Grid.Row="1" TextWrapping="Wrap" AcceptsReturn="True" VerticalAlignment="Top" Width="300" Visibility="Collapsed"/>
+        <Label x:Name="lbInitialText" Content="Введите начальное значение" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="20" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="34,4,0,0" Grid.Row="1" Visibility="Collapsed" FontFamily="Adobe Caslon Pro Bold"/>
+        <Label x:Name="lbFinalText" Content="Введите конечное значение" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="20" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="0,4,64.5,0" Visibility="Collapsed" FontFamily="Adobe Caslon Pro Bold" Grid.Row="1"/>
+        <ComboBox x:Name="cbParChange" HorizontalAlignment="Center" Height="28" Margin="0,144,0,0" Grid.Row="1" VerticalAlignment="Top" Width="90" IsReadOnly="True" FontSize="16" SelectionChanged="cbParChange_SelectionChanged" Visibility="Collapsed" Background="{StaticResource GrayBlueGradientBrush}" >
+            <TextBlock>Статус</TextBlock>
+            <TextBlock>Приоритет</TextBlock>
+        </ComboBox>
+        <TextBox x:Name="tbParam" HorizontalAlignment="Left" Height="80" Margin="342,120,0,0" Grid.Row="1" TextWrapping="Wrap"  AcceptsReturn="True" VerticalAlignment="Top" IsReadOnly="True" Width="100" FontSize="16" Visibility="Collapsed" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+
+
+        <TextBox x:Name="tbNumericUpDown" HorizontalAlignment="Left" Height="30" Margin="347,227,0,0" Grid.Row="1" TextWrapping="Wrap"  AcceptsReturn="True" VerticalAlignment="Top" IsReadOnly="True" Width="46" FontSize="16" Visibility="Collapsed" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+        <Button x:Name="btUpNum" Content="↑" HorizontalAlignment="Left" Height="30" Grid.Row="1" VerticalAlignment="Top" Width="24" Background="{StaticResource GrayBlueGradientBrush}" Click="btUpNum_Click" Margin="390,227,0,0" FontSize="22" Visibility="Collapsed" ScrollViewer.CanContentScroll="True" Foreground="#FFF5F9FF" FontFamily="Adobe Caslon Pro Bold"/>
+        <Button x:Name="btDownNum" Content="↓" HorizontalAlignment="Left" Height="30" Grid.Row="1" VerticalAlignment="Top" Width="24" Background="{StaticResource GrayBlueGradientBrush}" Click="btDownNum_Click" Margin="413,227,0,0" FontSize="22" Visibility="Collapsed" ScrollViewer.CanContentScroll="True" Foreground="#FFF5F9FF" FontFamily="Adobe Caslon Pro Bold"/>
+
+    </Grid>
+</Window>
