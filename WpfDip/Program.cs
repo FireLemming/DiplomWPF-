@@ -30,74 +30,21 @@ namespace WpfDip
             var URLserv = jiraLog.ServerInfo.GetServerInfoAsync().Result.BaseUrl;
             return jiraLog;
         }
-        /// <summary>
-        /// 
-        /// Метод для формирования списка задач на экспорт
-        /// </summary>
-        //public List<string> CreateIssuesList(Dictionary<string, List<string>> filt)//удалить
-        //{
-        //    var issuesFileList = IssuesFilter(filt);//вызов метода фильрации
-        //    //string[] parMas;//объявление массива, куда будут записываться значения из Jira
-        //    //List<IssueWork> issueList = new List<IssueWork>();//Создания списка, в который будут записываться объекты класса
-        //    //IssueWork IssWork;
-        //    //List<string> issuesFileOutputList = new List<string>();
-        //    //foreach (var pathFile in issuesFileList)
-        //    //{
-        //    //    List<Atlassian.Jira.Issue> issues;
-        //    //    using (TextReader fs = File.OpenText(pathFile))
-        //    //    {
-        //    //        issues = JsonConvert.DeserializeObject<List<Issue>>(fs.ReadToEnd());
-        //    //    }
-
-        //    //    foreach (var c in issues)
-        //    //    {
-        //    //        parMas = FillingOutputArray(c, filt);//Вызов метода проверки на null
-        //    //        if (filt.ContainsKey("paramchangefilter"))
-        //    //        {
-        //    //            if (Convert.ToInt32(parMas[11]) >= MainWindow.countLimit)//Тест отбора по количеству переходов на этапе вывода
-        //    //            {
-        //    //                IssWork = new IssueWork(parMas[0], parMas[1], parMas[2], parMas[3], parMas[4], parMas[5], parMas[6], parMas[7], parMas[8], parMas[9], parMas[10], parMas[11]);
-        //    //                issueList.Add(IssWork);
-        //    //            }
-
-        //    //        }
-        //    //        else
-        //    //        {
-        //    //            IssWork = new IssueWork(parMas[0], parMas[1], parMas[2], parMas[3], parMas[4], parMas[5], parMas[6], parMas[7], parMas[8], parMas[9], parMas[10], parMas[11]);
-        //    //            issueList.Add(IssWork);//Добавление объекта в список
-        //    //        }
-        //    //    }
-
-        //    //    var pathFileFilter = Path.GetTempFileName();
-        //    //    File.AppendAllText(pathFileFilter, JsonConvert.SerializeObject(issueList));//временный json 
-        //    //    issuesFileOutputList.Add(pathFileFilter);//добавление в список
-        //    //}
-        //    return issuesFileList;
-        //}
-
 
         /// <summary>
-        /// Метод для фильтрации задач
+        /// Метод для заполнения задачами временных файлов
         /// </summary>
-        public List<string> IssuesFilter(Dictionary<string, List<string>> filt)
+        public List<string> IssuesUpload(Dictionary<string, List<string>> filt)
         {
-
             var pathTempFile = Path.GetTempFileName();//создается временный файл, переменная хранит путь
-
-
-
-            jiraLog.Issues.MaxIssuesPerRequest = int.MaxValue;
-            //jiraLog.Issues.ValidateQuery = false;
-
-            List<IssueWork> issuesList = new List<IssueWork>();
-
+            jiraLog.Issues.MaxIssuesPerRequest = int.MaxValue;//задание количества задач для вывода (максимум 100)
             List<string> issuesFileList = new List<string>();//список путей к файлам, хранящим данные
-            List<string> issuesFileFilterList = new List<string>();
             List<Issue> issuesBegin = new List<Issue>();
             List<IssueWork> IssWork = new List<IssueWork>();
-            issuesBegin.AddRange( jiraLog.Issues.GetIssuesFromJqlAsync("").Result.ToList()); ;//пишем первые 100 задач
+            issuesBegin.AddRange(jiraLog.Issues.GetIssuesFromJqlAsync("").Result.ToList()); ;//вывод первых 100 задач
             int count = 0;
-            do {            //выгрузка всех задач в список
+            do
+            {            //выгрузка всех задач в список
                 var pathFile = Path.GetTempFileName();
                 foreach (var c in issuesBegin)
                 {
@@ -114,36 +61,24 @@ namespace WpfDip
                 File.AppendAllText(pathFile, JsonConvert.SerializeObject(IssWork));//временный json 
                 IssWork.Clear();
                 issuesFileList.Add(pathFile);//добавление в список
-
-                //issuesList.AddRange(issues);
-
                 issuesBegin.Clear();
                 count += 100;
-                issuesBegin.AddRange(jiraLog.Issues.GetIssuesFromJqlAsync("", startAt: count).Result.ToList());
-                string t = "";
+                issuesBegin.AddRange(jiraLog.Issues.GetIssuesFromJqlAsync("", startAt: count).Result.ToList());//добавление следующей сотни задач
             } while (issuesBegin.Count != 0);
-            
-            //
-            //var issues = jiraLog.Issues.Queryable.Where(c =>
-            //{
-            //if (filt["summary"].Where(t => t == c.Summary.ToLower().Replace(" ", "")).Count() > 0)
-            //{
-            //    if (filt["key"].Where(t => t == c.Key.ToString().ToLower().Replace(" ", "")).Count() > 0)
-            //        if (filt["priority"].Where(t => t == c.Priority.ToString().ToLower().Replace(" ", "")).Count() > 0)
-            //            if (filt["status"].Where(t => t == c.Status.ToString().ToLower().Replace(" ", "")).Count() > 0)
-            //                if (filt["type"].Where(t => t == c.Type.ToString().ToLower().Replace(" ", "")).Count() > 0)
-            //                    if (filt["created"].Where(t => t == c.Created.ToString().ToLower().Replace(" ", "")).Count() > 0)
-            //                        if (filt["environment"].Where(t => t == c.Environment.ToString().ToLower().Replace(" ", "")).Count() > 0)
-            //                            if (filt["project"].Where(t => t == c.Project.ToLower().Replace(" ", "")).Count() > 0)
-            //                                if (filt["assigneeuser"].Where(t => t == c.AssigneeUser.DisplayName.ToLower().Replace(" ", "")).Count() > 0)
-            //                                    if (filt["reporteruser"].Where(t => t == c.ReporterUser.DisplayName.ToLower().Replace(" ", "")).Count() > 0)
-            //                                        return true;
-            //}
-            //else return false;
+            if (filt.Count>0)
+                return IssuesFilter(filt, issuesFileList);
+            else return issuesFileList;
+        }
+        /// <summary>
+        /// Метод для фильтрации задач
+        /// </summary>
+        public List<string> IssuesFilter(Dictionary<string, List<string>> filt, List<string> issuesFileList)
+        {
 
-
+            List<string> issuesFileFilterList = new List<string>();
             foreach (var pathFile in issuesFileList)
             {
+                List<IssueWork> issuesList = new List<IssueWork>();
                 List<IssueWork> issues;
                 using (TextReader fs = File.OpenText(pathFile))
                 {
@@ -398,16 +333,16 @@ namespace WpfDip
                     }
                 });
 
-                if(filt.ContainsKey("paramchangefilter"))
-                    filt["paramchangefilter"].ForEach(s =>
-                    {
-                        ListParam.AddRange(s.Split(';'));//дробим список на значение(четные) и тип(нечетные)
-                        for (int i = 0; i < ListParam.Count; i++)
-                        {
-                            if (i % 2 == 0)
-                                ListParamBuf.Add(ListParam[i]);//Формируем список значений
-                        }
-                    });
+                //if(filt.ContainsKey("paramchangefilter"))
+                //    filt["paramchangefilter"].ForEach(s =>
+                //    {
+                //        ListParam.AddRange(s.Split(';'));//дробим список на значение(четные) и тип(нечетные)
+                //        for (int i = 0; i < ListParam.Count; i++)
+                //        {
+                //            if (i % 2 == 0)
+                //                ListParamBuf.Add(ListParam[i]);//Формируем список значений
+                //        }
+                //    });
 
                 ListParam.RemoveAll(c => ListParamBuf.Contains(c));//удаляем из списка параметров из фильтра все значения данных параметров
                 ListParam = ListParam.Distinct().ToList();//удаляем все повторяющиеся значения, т.е. оставляем только одно значение - тип параметра
@@ -433,6 +368,9 @@ namespace WpfDip
                     }
                     ListParamValue.Clear();
                 });
+                if (count == 0)
+                    return "Переходов не обнаружено";
+                else
                 return count.ToString();
             }
             else
@@ -480,9 +418,7 @@ namespace WpfDip
                     Regex.Replace(s.Description.Replace(";", ":"), @"\s+", " ") + ";" +
                     Regex.Replace(s.ParamChangeCount.Replace(";", ":"), @"\s+", " "));
             }
-
-            File.WriteAllText(path, csv.ToString(), Encoding.GetEncoding(1251));//не работает кодировка
-
+            File.WriteAllText(path, csv.ToString(), Encoding.GetEncoding(1251));
         }
         /// <summary>
         /// 

@@ -71,7 +71,7 @@ namespace WpfDip
             dgAll.ItemsSource = null;
             dgAll.Items.Refresh();
 
-            issuesFileOutputList.AddRange(prog.IssuesFilter(filt));
+            issuesFileOutputList.AddRange(prog.IssuesUpload(filt));
             foreach (var pathFile in issuesFileOutputList)
             {
                 using (TextReader fs = File.OpenText(pathFile))
@@ -80,19 +80,19 @@ namespace WpfDip
                 }
             }
             dgAll.ItemsSource = issueList;
-            
+            issuesFileOutputList.Clear();
 
             MessageBox.Show("Выборка задач завершена", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void btExportCSV_Click(object sender, RoutedEventArgs e)
         {
-            //if (dgAll.Items.Count > 0)
-           // {
+            if (dgAll.Items.Count > 0)
+            {
                 ExportWindow ew = new ExportWindow(issuesFileOutputList, "csv");
                 ew.ShowDialog();
-           // }
-            //else MessageBox.Show("Сначала выберите задачи", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            else MessageBox.Show("Сначала выберите задачи", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         private void btExportJSON_Click(object sender, RoutedEventArgs e)
