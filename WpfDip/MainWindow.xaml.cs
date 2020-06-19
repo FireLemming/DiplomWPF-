@@ -70,7 +70,7 @@ namespace WpfDip
             issueList.Clear();
             dgAll.ItemsSource = null;
             dgAll.Items.Refresh();
-
+            issuesFileOutputList.Clear();
             issuesFileOutputList.AddRange(prog.IssuesUpload(filt));
             foreach (var pathFile in issuesFileOutputList)
             {
@@ -80,7 +80,7 @@ namespace WpfDip
                 }
             }
             dgAll.ItemsSource = issueList;
-            issuesFileOutputList.Clear();
+            
 
             MessageBox.Show("Выборка задач завершена", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
         }
