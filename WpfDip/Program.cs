@@ -49,13 +49,21 @@ namespace WpfDip
                 foreach (var c in issuesBegin)
                 {
                     var parMas = FillingOutputArray(c, filt);//Вызов метода проверки на null
+
                     if (filt.ContainsKey("paramchangefilter"))
                     {
-                        if (Convert.ToInt32(parMas[11]) >= MainWindow.countLimit)//Тест отбора по количеству переходов на этапе вывода
+                        if (Convert.ToInt32(parMas[11]) >= MainWindow.countLimit)//Добавляется только больше опр. кол-ва
                             IssWork.Add(new IssueWork(parMas[0], parMas[1], parMas[2], parMas[3], parMas[4], parMas[5], parMas[6], parMas[7], parMas[8], parMas[9], parMas[10], parMas[11]));
                     }
                     else
-                        IssWork.Add(new IssueWork(parMas[0], parMas[1], parMas[2], parMas[3], parMas[4], parMas[5], parMas[6], parMas[7], parMas[8], parMas[9], parMas[10], parMas[11]));
+                    {
+                        if (filt.ContainsKey("paramchangecount"))
+                            if(Convert.ToInt32(parMas[11]) == 0)
+                                IssWork.Add(new IssueWork(parMas[0], parMas[1], parMas[2], parMas[3], parMas[4], parMas[5], parMas[6], parMas[7], parMas[8], parMas[9], parMas[10], "Переходы не обнаружены"));
+                            else
+                                IssWork.Add(new IssueWork(parMas[0], parMas[1], parMas[2], parMas[3], parMas[4], parMas[5], parMas[6], parMas[7], parMas[8], parMas[9], parMas[10], parMas[11]));
+
+                    }
                 }
 
                 File.AppendAllText(pathFile, JsonConvert.SerializeObject(IssWork));//временный json 
@@ -231,6 +239,7 @@ namespace WpfDip
             }
             return issuesFileFilterList;
         }
+
         /// <summary>
         /// Метод для проверки на Null значений из Jira
         /// </summary>
@@ -301,15 +310,16 @@ namespace WpfDip
                 parMas[10] = c.Description;
             }
             else parMas[10] = "Описание не задано";
-
-            parMas[11] = paramChangeCountWork(c, filt);
+            if (filt.ContainsKey("paramchangefilter") || filt.ContainsKey("paramchangecount"))
+                parMas[11] = paramChangeCountWork(c, filt).ToString();
+            else parMas[11] = "Фильтр или счётчик переходов не задан";
 
             return parMas;
         }
         /// <summary>
         /// Метод для подсчёта изменений статуса
         /// </summary>
-        static string paramChangeCountWork (Atlassian.Jira.Issue c, Dictionary<string, List<string>> filt)
+        static int paramChangeCountWork (Atlassian.Jira.Issue c, Dictionary<string, List<string>> filt)
         {
             var changeLog = jiraLog.Issues.GetChangeLogsAsync(c.Key.ToString()).Result;
             int count = 0;
@@ -333,16 +343,16 @@ namespace WpfDip
                     }
                 });
 
-                //if(filt.ContainsKey("paramchangefilter"))
-                //    filt["paramchangefilter"].ForEach(s =>
-                //    {
-                //        ListParam.AddRange(s.Split(';'));//дробим список на значение(четные) и тип(нечетные)
-                //        for (int i = 0; i < ListParam.Count; i++)
-                //        {
-                //            if (i % 2 == 0)
-                //                ListParamBuf.Add(ListParam[i]);//Формируем список значений
-                //        }
-                //    });
+                if (filt.ContainsKey("paramchangefilter"))
+                    filt["paramchangefilter"].ForEach(s =>
+                    {
+                        ListParam.AddRange(s.Split(';'));//дробим список на значение(четные) и тип(нечетные)
+                        for (int i = 0; i < ListParam.Count; i++)
+                        {
+                            if (i % 2 == 0)
+                                ListParamBuf.Add(ListParam[i]);//Формируем список значений
+                        }
+                    });
 
                 ListParam.RemoveAll(c => ListParamBuf.Contains(c));//удаляем из списка параметров из фильтра все значения данных параметров
                 ListParam = ListParam.Distinct().ToList();//удаляем все повторяющиеся значения, т.е. оставляем только одно значение - тип параметра
@@ -350,11 +360,13 @@ namespace WpfDip
                 {
                     e.Items.ToList().ForEach(s =>
                     {
-                        if (s.FieldName.Contains(ListParam[0]))
-                        {
-                            ListFromValue.Add(s.FromValue.ToLower().Replace(" ", "")); //Заполнение списка изначальными значениями
-                            ListToValue.Add(s.ToValue.ToLower().Replace(" ", "")); //Заполнение списка конечными значениями
-                        }
+
+                            if (s.FieldName.Contains(ListParam[0]))
+                            {
+                                ListFromValue.Add(s.FromValue.ToLower().Replace(" ", "")); //Заполнение списка изначальными значениями
+                                ListToValue.Add(s.ToValue.ToLower().Replace(" ", "")); //Заполнение списка конечными значениями
+                            }
+
                     });
                 }
                 ListParamBuf.ForEach(t =>
@@ -368,13 +380,11 @@ namespace WpfDip
                     }
                     ListParamValue.Clear();
                 });
-                if (count == 0)
-                    return "Переходов не обнаружено";
-                else
-                return count.ToString();
+
+                return count;
             }
             else
-                return "Пользователь не задал значения";
+                return 0;
         }
         /// <summary>
         /// Метод для экспорта CSV
